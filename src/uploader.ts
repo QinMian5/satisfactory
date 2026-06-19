@@ -1,7 +1,7 @@
 // abstract: Playwright browser lifecycle and save-file upload automation for the interactive map.
 // out_of_scope: Save discovery, filesystem watching, and third-party API reverse engineering.
 
-import { chromium, type Browser, type Page } from "playwright";
+import { type Browser, chromium, type Page } from "playwright";
 
 const MAP_URL = "https://satisfactory-calculator.com/zh/interactive-map";
 const UPLOAD_PROMPT = /点击|拖拽|Click|Drag|upload|save/i;
@@ -24,7 +24,9 @@ export class MapUploader {
       return;
     }
 
-    throw new Error("Could not find the map save upload control; the page structure may have changed.");
+    throw new Error(
+      "Could not find the map save upload control; the page structure may have changed.",
+    );
   }
 
   async close(): Promise<void> {
