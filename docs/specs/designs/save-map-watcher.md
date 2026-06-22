@@ -26,7 +26,7 @@ out_of_scope: Automatic updates, tray behavior, signing integration, Store submi
 ## Inputs & Outputs
 
 - **Inputs:** `.sav` files under the default Satisfactory Windows save root, including nested account or profile directories.
-- **Outputs:** A local status window with a reusable embedded Electron map view containing the Satisfactory Calculator interactive map loaded from the latest selected save, an unpacked Windows app package, and an AppX/MSIX-family package artifact.
+- **Outputs:** A local status window with a reusable embedded Electron map view containing the Satisfactory Calculator interactive map loaded from the latest selected save, an unpacked Windows app package, a guided Windows installer artifact, a portable zip artifact, and a Store-oriented AppX/MSIX-family package artifact.
 - **Artifacts:** TypeScript source files, React renderer files, Tailwind stylesheet entry, tests, pnpm lockfile, Electron Forge configuration, Vite configuration, Biome configuration, TypeScript configuration, pre-commit hook configuration, commitlint configuration, GitHub Actions workflows, documentation, and MIT license text.
 
 ## Design Approach
@@ -58,11 +58,14 @@ out_of_scope: Automatic updates, tray behavior, signing integration, Store submi
   - `src/renderer/view-model.ts` selects the active renderer view and maps detailed watcher/upload state to primary user-facing status copy.
   - `src/shared/` contains serializable state and IPC contracts.
   - `forge.config.ts` configures Electron Forge Vite, ASAR, and Electron fuses for the unpacked package.
-  - `electron-builder.config.cjs` configures the AppX/MSIX-family package artifact from the unpacked package.
-  - `scripts/verify-package.mjs` audits the real unpacked app and AppX package artifacts.
+  - `electron-builder.config.cjs` configures the Windows installer, portable zip, and AppX/MSIX-family package artifacts from the unpacked package.
+  - `scripts/package-paths.mjs` computes normalized Windows package and executable paths from package metadata.
+  - `scripts/package-windows.mjs` creates the Electron Forge package and normalizes the unpacked package directory to the portable artifact stem.
+  - `scripts/make-windows.mjs` creates installer, portable zip, or AppX artifacts from the normalized unpacked package directory.
+  - `scripts/verify-package.mjs` audits the real unpacked app, GitHub release artifacts, and Store-oriented AppX artifacts.
   - `scripts/smoke-package.mjs` launches the unpacked app executable in `--smoke-test` mode.
   - `scripts/integration-package.mjs` launches the unpacked app executable in `--integration-test-upload` mode with a loopback fixture page and synthetic `.sav`.
-  - `package.json` exposes `dev`, `build`, `start`, `package`, `make`, `verify:package`, `verify:make`, `smoke:package`, `integration:package`, `lint`, `fix`, `typecheck`, `test`, `check`, and `hooks:install` scripts.
+  - `package.json` exposes `dev`, `build`, `start`, `package`, `make`, `make:installer`, `make:portable`, `make:appx`, `verify:package`, `verify:make`, `verify:installer`, `verify:portable`, `verify:appx`, `smoke:package`, `integration:package`, `lint`, `fix`, `typecheck`, `test`, `check`, and `hooks:install` scripts.
 - **Interactions:** The renderer calls the preload API. The preload API invokes centralized IPC channels. IPC handlers validate the exact status-window `webContents` and sender frame, call `AppRuntimeController`, and return state snapshots. The runtime controller blocks unauthorized commands before save-root resolution. Language changes persist through preferences, update in-memory consent language, update renderer copy, and select the uploader target URL from the shared language registry. The watcher obtains an upload generation token before scanning for the latest save. The uploader validates the same token before loading the page, before setting the file input, and after file selection. The uploader validates the selected absolute `.sav` path in the main process, records the current remote-page scroll position, asks the map window to load the selected language's map page, validates expected DOM state, attaches the debugger only for file selection, sends CDP DOM commands, confirms the upload panel changes from visible to hidden, waits for the panel to return visible with the file input cleared, restores the recorded remote-page scroll position on success or failure, and detaches the debugger in `finally`. Real Satisfactory Calculator map loads run a best-effort viewport alignment script that locates the remote layout anchor `body > main > div:nth-child(2) > div:nth-child(2) > div.col-md-4.col-lg-3`, calculates the remote header height from `body > header > nav`, and scrolls with `16px` padding; local integration-test URLs are not aligned. The map page load waits for the main frame; child frame resource failures from third-party page internals do not make the map load fail. The map session uses a host resource policy: packaged production blocks non-allowlisted resource hosts without writing development logs, while development blocks with the same allow-list and writes sanitized local request metadata plus each allow/block decision. `SATISFACTORY_MAP_RESOURCE_FILTER=audit` switches development runs to audit-only logging for resource discovery. The integration-test mode reuses this uploader path with a main-process-only target URL and synthetic `.sav` supplied by the local test harness.
 
 ## Runtime Behavior
@@ -120,12 +123,18 @@ out_of_scope: Automatic updates, tray behavior, signing integration, Store submi
 - `pnpm run dev` runs Electron Forge development startup.
 - `pnpm run build` runs TypeScript typechecking without opening a GUI.
 - `pnpm run start` runs Electron Forge development startup.
-- `pnpm run package` creates an unpacked Windows x64 Electron package.
+- `pnpm run package` creates an unpacked Windows x64 Electron package under `out/SatisfactorySaveMapUploader-Portable-<version>-x64`.
 - `pnpm run verify:package` audits the unpacked package, `app.asar`, fuses, Authenticode status, source maps, forbidden artifacts, Electron version, and largest files.
 - `pnpm run smoke:package` launches the real unpacked Windows executable with `--smoke-test`.
 - `pnpm run integration:package` launches the real unpacked Windows executable with `--integration-test-upload`, a local synthetic `.sav`, and a loopback fixture page that reads and verifies the uploaded file contents without contacting the real map website.
-- `pnpm run make` creates a Windows x64 AppX/MSIX-family package under `out/make/appx`.
-- `pnpm run verify:make` validates AppX package names, sizes, and SHA-256 checksum files.
+- `pnpm run make` creates a Windows x64 guided installer and portable zip under `out/make`.
+- `pnpm run make:installer` creates only the Windows x64 guided installer under `out/make`.
+- `pnpm run make:portable` creates only the Windows x64 portable zip under `out/make`.
+- `pnpm run verify:make` validates installer and portable zip names, sizes, and SHA-256 checksum files.
+- `pnpm run verify:installer` validates the installer name, size, and SHA-256 checksum file.
+- `pnpm run verify:portable` validates the portable zip name, size, and SHA-256 checksum file.
+- `pnpm run make:appx` creates a Windows x64 AppX/MSIX-family package under `out/make` for Store validation.
+- `pnpm run verify:appx` validates the AppX package name, size, and SHA-256 checksum file.
 - `pnpm run lint` runs `biome ci .`.
 - `pnpm run fix` runs `biome check --write .`.
 - `pnpm run typecheck` runs `tsc -p tsconfig.json --noEmit`.
@@ -135,14 +144,14 @@ out_of_scope: Automatic updates, tray behavior, signing integration, Store submi
 
 ## Distribution
 
-- GitHub test builds are unsigned AppX/MSIX-family package artifacts.
+- GitHub test builds are unsigned installer and portable zip artifacts.
 - Tag builds create draft releases with unsigned artifacts and checksums.
-- GitHub Actions use read-only default permissions. The tag-only draft release job uses write permission only after build, check, package verification, make, AppX verification, and artifact upload complete.
+- GitHub Actions use read-only default permissions. The tag-only draft release job uses write permission only after build, check, package verification, release artifact verification, and artifact upload complete.
 - GitHub Actions use official actions pinned to full commit SHA references.
-- Microsoft Store distribution is documented as a validation path using Electron Forge package output and AppX/MSIX-family package artifacts.
+- Microsoft Store distribution is documented as a separate validation path using Electron Forge package output and AppX/MSIX-family package artifacts.
 - Store identity fields are centralized in `config/app-metadata.ts` and mirrored into `electron-builder.config.cjs` for AppX package generation. The current Partner Center product identity is `MianQin.SatisfactorySaveMapUploader`, publisher `CN=DCC117A3-6615-4987-B0AD-FF45756501E3`, publisher display name `Mian Qin`, and Store ID `9PHQ2D03K6ZS`.
 
 ## Validation
 
 - **Checks:** Automated tests cover recursive latest-save selection, metadata exclusion, debounce coalescing, app state snapshots and logs, renderer permission view selection, language registry coverage, renderer copy coverage, persisted language changes, locale-specific map URL selection, language-change re-upload of the currently opened save, watcher lifecycle, missing directory handling, serialized latest-wins uploads, stop semantics, stale upload protection, lifecycle helpers, map close/destroy behavior, background throttling, CDP command order, upload error classification, file validation, DOM readiness phases, IPC channels and sender validation, preload subscription behavior, URL allow-list boundaries, permission denial, revocation marker persistence, Accept/Revoke mutation ordering, integration-test config validation, and package verification helpers.
-- **Evidence:** Local quality checks run Biome, TypeScript, and Vitest. Packaging verification runs Electron Forge package output audits, local packaged smoke tests, local packaged Electron/CDP integration tests, AppX package output audits, checksum generation, and fuse reads against the real packaged executable. Manual validation covers real website upload behavior, default save discovery, latest save upload, map view behavior, game-save-triggered upload, application exit, clean package installation, uninstall behavior, and package inspection for absent Playwright browser artifacts.
+- **Evidence:** Local quality checks run Biome, TypeScript, and Vitest. Packaging verification runs Electron Forge package output audits, local packaged smoke tests, local packaged Electron/CDP integration tests, installer and portable zip output audits, optional AppX package output audits, checksum generation, and fuse reads against the real packaged executable. Manual validation covers real website upload behavior, default save discovery, latest save upload, map view behavior, game-save-triggered upload, application exit, clean installer operation, portable zip startup, uninstall behavior, and package inspection for absent Playwright browser artifacts.

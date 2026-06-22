@@ -1,4 +1,4 @@
-// abstract: electron-builder settings for Windows AppX/MSIX-family package artifacts.
+// abstract: electron-builder settings for Windows release and Store package artifacts.
 // out_of_scope: Electron Forge Vite packaging, runtime behavior, and release publication.
 
 const packageJson = require("./package.json");
@@ -9,13 +9,22 @@ const extMacro = "$" + "{ext}";
 module.exports = {
   appId: "io.github.qinmian5.satisfactory-save-map-uploader",
   productName: packageJson.productName,
-  artifactName: `SatisfactorySaveMapUploader-${versionMacro}-${archMacro}.${extMacro}`,
+  artifactName: `SatisfactorySaveMapUploader-Portable-${versionMacro}-${archMacro}.${extMacro}`,
   directories: {
-    output: "out/make/appx",
+    output: "out/make",
   },
   win: {
     executableName: "SatisfactorySaveMapUploader",
-    target: ["appx"],
+    target: ["nsis", "zip"],
+  },
+  nsis: {
+    artifactName: `SatisfactorySaveMapUploader-Installer-${versionMacro}-${archMacro}.${extMacro}`,
+    oneClick: false,
+    perMachine: false,
+    allowToChangeInstallationDirectory: true,
+    createDesktopShortcut: true,
+    createStartMenuShortcut: true,
+    shortcutName: packageJson.productName,
   },
   appx: {
     identityName: "MianQin.SatisfactorySaveMapUploader",

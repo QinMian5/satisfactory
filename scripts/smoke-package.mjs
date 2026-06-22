@@ -5,14 +5,10 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { getExpectedPackageExecutable } from "./package-paths.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
-const PACKAGE_EXE = path.join(
-  ROOT,
-  "out",
-  "Satisfactory Save Map Uploader-win32-x64",
-  "SatisfactorySaveMapUploader.exe",
-);
+const PACKAGE_EXE = getExpectedPackageExecutable(await readPackageJson(), ROOT);
 const TIMEOUT_MS = 30_000;
 
 async function main() {
@@ -63,6 +59,10 @@ async function printSmokeLog(logPath) {
   } catch {
     console.error(`Smoke log was not created: ${logPath}`);
   }
+}
+
+async function readPackageJson() {
+  return JSON.parse(await fs.readFile(path.join(ROOT, "package.json"), "utf8"));
 }
 
 main().catch((error) => {

@@ -36,17 +36,17 @@ This test provides a `.sav` file to the third-party Satisfactory Calculator webs
 23. If the website changes selectors, confirm the app reports a clear selector or DOM-state error instead of crashing.
 24. Close the main status window and confirm all app, Electron, Chromium, and Node processes exit.
 
-## B. AppX/MSIX Clean Environment Test
+## B. Installer And Portable Clean Environment Test
 
 Prefer Windows Sandbox or a separate Windows VM. The tester should not need Node.js, pnpm, Playwright, or a separate Chromium installation.
 
-Windows Sandbox is optional. If enabled, copy the generated package into the sandbox and run it there. A minimal `.wsb` file can map the local maker directory:
+Windows Sandbox is optional. If enabled, copy the generated release artifacts into the sandbox and run them there. A minimal `.wsb` file can map the local maker directory:
 
 ```xml
 <Configuration>
   <MappedFolders>
     <MappedFolder>
-      <HostFolder>D:\Code\satisfactory\out\make\appx</HostFolder>
+      <HostFolder>D:\Code\satisfactory\out\make</HostFolder>
       <ReadOnly>true</ReadOnly>
     </MappedFolder>
   </MappedFolders>
@@ -54,14 +54,14 @@ Windows Sandbox is optional. If enabled, copy the generated package into the san
 </Configuration>
 ```
 
-Unsigned AppX packages are expected to be install-blocked on a clean machine unless a trusted signing certificate is present. Record that result and stop this section until a signed package is available.
+Unsigned installers and portable zips can trigger Windows SmartScreen or Defender warnings. Record the exact prompt instead of treating every warning as a functional failure.
 
-1. Copy `SatisfactorySaveMapUploader-0.1.0-x64.appx` and its `.sha256` file into a clean Windows environment without Node or pnpm.
-2. Verify the package SHA-256 checksum.
-3. Record Windows App Installer, SmartScreen, and Defender behavior.
-4. If the package is unsigned, confirm Windows blocks installation or requires a trusted certificate, then stop this section.
-5. Install the signed package without installing Node, pnpm, Playwright, or Chromium development dependencies.
-6. Confirm installation does not require administrator permission unless a local test certificate is being trusted for the test.
+1. Copy `SatisfactorySaveMapUploader-Installer-0.1.0-x64.exe`, `SatisfactorySaveMapUploader-Portable-0.1.0-x64.zip`, and their `.sha256` files into a clean Windows environment without Node or pnpm.
+2. Verify each SHA-256 checksum.
+3. Record Windows SmartScreen and Defender behavior for the installer and the portable zip.
+4. Run `SatisfactorySaveMapUploader-Installer-0.1.0-x64.exe`.
+5. Confirm the installer shows a guided setup flow and allows selecting an installation directory.
+6. Confirm installation does not require administrator permission.
 7. Confirm the Start menu shortcut is present and launches the app.
 8. Confirm the application name and version are correct.
 9. Launch once and confirm only one app instance is running.
@@ -69,8 +69,12 @@ Unsigned AppX packages are expected to be install-blocked on a clean machine unl
 11. Run the real upload checklist items that are appropriate for the test environment.
 12. Confirm the map is embedded in the main window and no separate map window is opened.
 13. Close the main status window and confirm no app, Electron, Chromium, or Node processes remain.
-14. Relaunch the app and confirm it starts normally.
+14. Relaunch the installed app and confirm it starts normally.
 15. Uninstall the app successfully.
 16. After uninstall, confirm no app process remains.
-17. Check the user profile for cache, session, shortcut, and package remnants. Electron cache and user preferences may remain under the user profile after uninstall; record them instead of treating every user-data remnant as an install failure.
-18. Inspect the package contents or installation directory and confirm it does not contain Playwright Chromium, `ms-playwright`, `.local-browsers`, `chrome-win`, `playwright`, or `@playwright`.
+17. Check the user profile for cache, session, shortcut, installer, and application data remnants. Electron cache and user preferences may remain under the user profile after uninstall; record them instead of treating every user-data remnant as an install failure.
+18. Inspect the installation directory and confirm it does not contain Playwright Chromium, `ms-playwright`, `.local-browsers`, `chrome-win`, `playwright`, or `@playwright`.
+19. Extract `SatisfactorySaveMapUploader-Portable-0.1.0-x64.zip` in a clean folder.
+20. Run `SatisfactorySaveMapUploader.exe` from the extracted portable folder.
+21. Confirm the portable app starts without installation and uses the same first-run permission behavior.
+22. Close the portable app and confirm no app, Electron, Chromium, or Node processes remain.

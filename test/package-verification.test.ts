@@ -8,7 +8,10 @@ import { describe, expect, it } from "vitest";
 import {
   findForbiddenArtifacts,
   findUnpackedPackageDirectory,
+  getExpectedInstallerArtifacts,
   getExpectedMakeArtifacts,
+  getExpectedPackageDirectory,
+  getExpectedPortableArtifacts,
   getPackagedMetadataIssues,
   parseFuseReadOutput,
   summarizeSourceMaps,
@@ -123,10 +126,30 @@ Fuse Version: v1
     }
   });
 
-  it("expects AppX package artifacts", () => {
+  it("expects the unpacked package directory to match the portable artifact stem", () => {
+    expect(getExpectedPackageDirectory({ version: "0.1.0" })).toBe(
+      path.join("out", "SatisfactorySaveMapUploader-Portable-0.1.0-x64"),
+    );
+  });
+
+  it("expects installer and portable zip make artifacts", () => {
     expect(getExpectedMakeArtifacts({ version: "0.1.0" })).toEqual({
-      makeDir: path.join("out", "make", "appx"),
-      files: [path.join("out", "make", "appx", "SatisfactorySaveMapUploader-0.1.0-x64.appx")],
+      makeDir: path.join("out", "make"),
+      files: [
+        path.join("out", "make", "SatisfactorySaveMapUploader-Installer-0.1.0-x64.exe"),
+        path.join("out", "make", "SatisfactorySaveMapUploader-Portable-0.1.0-x64.zip"),
+      ],
+    });
+  });
+
+  it("expects separate installer and portable make artifacts", () => {
+    expect(getExpectedInstallerArtifacts({ version: "0.1.0" })).toEqual({
+      makeDir: path.join("out", "make"),
+      files: [path.join("out", "make", "SatisfactorySaveMapUploader-Installer-0.1.0-x64.exe")],
+    });
+    expect(getExpectedPortableArtifacts({ version: "0.1.0" })).toEqual({
+      makeDir: path.join("out", "make"),
+      files: [path.join("out", "make", "SatisfactorySaveMapUploader-Portable-0.1.0-x64.zip")],
     });
   });
 });

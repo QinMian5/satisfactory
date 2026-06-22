@@ -48,7 +48,7 @@ describe("build configuration", () => {
     expect(allDependencies).not.toHaveProperty("style-loader");
   });
 
-  it("uses uploader product metadata and builds AppX package artifacts", async () => {
+  it("uses uploader product metadata and builds GitHub release artifacts", async () => {
     const [packageJsonText, builderConfig, forgeConfig, appMetadata] = await Promise.all([
       readFile("package.json", "utf8"),
       readFile("electron-builder.config.cjs", "utf8"),
@@ -59,11 +59,25 @@ describe("build configuration", () => {
 
     expect(packageJson.name).toBe("satisfactory-save-map-uploader");
     expect(packageJson.productName).toBe("Satisfactory Save Map Uploader");
-    expect(packageJson.scripts.make).toContain("electron-builder");
-    expect(packageJson.scripts.make).toContain("--win appx");
+    const packageScripts = Object.entries(packageJson.scripts)
+      .filter(([name]) => name === "package" || name.startsWith("make"))
+      .map(([, script]) => script)
+      .join("\n");
+    expect(packageJson.scripts.package).toBe("node scripts/package-windows.mjs");
+    expect(packageJson.scripts.make).toBe("node scripts/make-windows.mjs nsis zip");
+    expect(packageJson.scripts.make).not.toContain("--win appx");
+    expect(packageJson.scripts["make:installer"]).toBe("node scripts/make-windows.mjs nsis");
+    expect(packageJson.scripts["make:portable"]).toBe("node scripts/make-windows.mjs zip");
+    expect(packageJson.scripts["make:appx"]).toBe("node scripts/make-windows.mjs appx");
+    expect(packageScripts).not.toContain("Satisfactory Save Map Uploader-win32-x64");
     expect(packageJson.scripts["verify:make"]).toContain("verify-package.mjs make");
+    expect(packageJson.scripts["verify:installer"]).toContain("verify-package.mjs installer");
+    expect(packageJson.scripts["verify:portable"]).toContain("verify-package.mjs portable");
     expect(builderConfig).toContain('appId: "io.github.qinmian5.satisfactory-save-map-uploader"');
-    expect(builderConfig).toContain('target: ["appx"]');
+    expect(builderConfig).toContain('target: ["nsis", "zip"]');
+    expect(builderConfig).toContain("SatisfactorySaveMapUploader-Installer-");
+    expect(builderConfig).toContain("SatisfactorySaveMapUploader-Portable-");
+    expect(builderConfig).not.toContain("SatisfactorySaveMapUploader-Setup-");
     expect(builderConfig).toContain('identityName: "MianQin.SatisfactorySaveMapUploader"');
     expect(builderConfig).toContain('displayName: "Satisfactory Save Map Uploader"');
     expect(builderConfig).toContain('publisher: "CN=DCC117A3-6615-4987-B0AD-FF45756501E3"');
@@ -75,7 +89,6 @@ describe("build configuration", () => {
       'packageFamilyName: "MianQin.SatisfactorySaveMapUploader_xrv9fnatjde9j"',
     );
     expect(appMetadata).toContain('partnerCenterProductId: "9PHQ2D03K6ZS"');
-    expect(builderConfig).not.toContain("nsis");
     expect(forgeConfig).not.toContain("MakerSquirrel");
     expect(forgeConfig).not.toContain("@electron-forge/maker-squirrel");
     expect(packageJson.scripts.make).not.toContain("electron-forge make");

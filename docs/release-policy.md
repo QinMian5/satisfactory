@@ -11,11 +11,11 @@ Pull requests and pushes run with default `contents: read` permission. Windows C
 
 ## GitHub Beta Builds
 
-GitHub beta and test package artifacts are unsigned AppX/MSIX-family packages. Unsigned AppX artifacts are for build verification and may be blocked by Windows installation policy on a clean machine until a trusted signature is available. Build artifacts must come from GitHub Actions and must be traceable to the source commit.
+GitHub beta and test package artifacts are unsigned Windows installers and portable zip archives. Unsigned artifacts can trigger Windows SmartScreen warnings. Build artifacts must come from GitHub Actions and must be traceable to the source commit.
 
 ## GitHub Tag Releases
 
-Version tags use the `vX.Y.Z` format and must match `package.json` version `X.Y.Z`. Tag workflows validate the version, install dependencies, run checks, build, package, verify the package, make the AppX package, verify AppX artifacts, generate SHA-256 checksums, upload a workflow artifact, and then create a draft release from a separate job with `contents: write` permission. Draft releases are not automatically published.
+Version tags use the `vX.Y.Z` format and must match `package.json` version `X.Y.Z`. Tag workflows validate the version, install dependencies, run checks, build, package, verify the package, make release artifacts, verify installer and portable zip artifacts, generate SHA-256 checksums, upload a workflow artifact, and then create a draft release from a separate job with `contents: write` permission. Draft releases are not automatically published.
 
 Workflow dispatch builds upload Actions artifacts only and do not create GitHub Releases.
 
@@ -27,8 +27,8 @@ Release Candidate validation includes `pnpm run integration:package` on a local 
 
 ## Signing
 
-Public release packages must be signed before distribution. Microsoft Store MSIX/AppX distribution uses Store-managed signing after certification and does not require a reusable certificate from Partner Center. Store-external distribution, including GitHub Release artifacts, still requires a signing service or certificate. Signing for Store-external release artifacts is expected to use Azure Artifact Signing once release credentials and GitHub Actions OIDC are configured. The release workflow must fail closed: failed signing or failed signature verification prevents publication of signed release artifacts.
+Public release packages must be signed before distribution. Microsoft Store MSIX/AppX distribution uses Store-managed signing after certification and does not require a reusable certificate from Partner Center. Store-external distribution, including GitHub Release installer and portable zip artifacts, still requires a signing service or certificate. Signing for Store-external release artifacts is expected to use Azure Artifact Signing once release credentials and GitHub Actions OIDC are configured. The release workflow must fail closed: failed signing or failed signature verification prevents publication of signed release artifacts.
 
 ## Microsoft Store
 
-The Store route is a separate validation path. Store signing applies only to Store-distributed packages and does not sign GitHub Release AppX/MSIX artifacts.
+The Store route is a separate validation path. Store signing applies only to Store-distributed packages and does not sign GitHub Release installer or portable zip artifacts.

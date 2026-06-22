@@ -7,11 +7,13 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { promisify } from "node:util";
 import asar from "@electron/asar";
+import { getExpectedPackageDirectory } from "./package-paths.mjs";
+
+export { getExpectedPackageDirectory } from "./package-paths.mjs";
 
 const execFileAsync = promisify(execFile);
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const OUT_DIR = path.join(ROOT, "out");
-const EXPECTED_PACKAGE_DIR_NAME = "Satisfactory Save Map Uploader-win32-x64";
 const EXE_NAME = "SatisfactorySaveMapUploader.exe";
 const REQUIRED_PACKAGE_FILES = [
   EXE_NAME,
@@ -100,7 +102,11 @@ export function getPackagedMetadataIssues(rootPackageJson, packagedPackageJson) 
 }
 
 export async function findUnpackedPackageDirectory(outRoot) {
-  const expectedPath = path.join(outRoot, EXPECTED_PACKAGE_DIR_NAME);
+  const packageJson = await readPackageJson();
+  const expectedPath = getExpectedPackageDirectory(
+    packageJson,
+    path.dirname(path.resolve(outRoot)),
+  );
   const expectedCandidate = (await isUnpackedPackageDirectory(expectedPath)) ? expectedPath : null;
   if (expectedCandidate) {
     return expectedCandidate;
@@ -135,7 +141,36 @@ export async function findUnpackedPackageDirectory(outRoot) {
 }
 
 export function getExpectedMakeArtifacts(packageJson, root = "") {
-  const makeDir = path.join(root, "out", "make", "appx");
+  const installer = getExpectedInstallerArtifacts(packageJson, root);
+  const portable = getExpectedPortableArtifacts(packageJson, root);
+  return {
+    makeDir: installer.makeDir,
+    files: [...installer.files, ...portable.files],
+  };
+}
+
+export function getExpectedInstallerArtifacts(packageJson, root = "") {
+  const makeDir = path.join(root, "out", "make");
+  return {
+    makeDir,
+    files: [
+      path.join(makeDir, `SatisfactorySaveMapUploader-Installer-${packageJson.version}-x64.exe`),
+    ],
+  };
+}
+
+export function getExpectedPortableArtifacts(packageJson, root = "") {
+  const makeDir = path.join(root, "out", "make");
+  return {
+    makeDir,
+    files: [
+      path.join(makeDir, `SatisfactorySaveMapUploader-Portable-${packageJson.version}-x64.zip`),
+    ],
+  };
+}
+
+export function getExpectedAppxArtifacts(packageJson, root = "") {
+  const makeDir = path.join(root, "out", "make");
   return {
     makeDir,
     files: [path.join(makeDir, `SatisfactorySaveMapUploader-${packageJson.version}-x64.appx`)],
@@ -155,7 +190,7 @@ function normalizeArtifactPath(candidate) {
 
 async function main() {
   const mode = process.argv[2] ?? "package";
-  if (!["package", "make", "all"].includes(mode)) {
+  if (!["package", "make", "installer", "portable", "appx", "all"].includes(mode)) {
     throw new Error(`Unknown verification mode: ${mode}`);
   }
 
@@ -164,6 +199,15 @@ async function main() {
   }
   if (mode === "make" || mode === "all") {
     await verifyMake();
+  }
+  if (mode === "installer") {
+    await verifyInstaller();
+  }
+  if (mode === "portable") {
+    await verifyPortable();
+  }
+  if (mode === "appx") {
+    await verifyAppx();
   }
 }
 
@@ -245,18 +289,52 @@ async function verifyPackage() {
 
 async function verifyMake() {
   const packageJson = await readPackageJson();
-  const expected = getExpectedMakeArtifacts(packageJson, ROOT);
+  await verifyReleaseArtifacts(
+    getExpectedMakeArtifacts(packageJson, ROOT),
+    "Release artifacts",
+    packageJson,
+  );
+}
 
-  await assertPathExists(expected.makeDir, "AppX maker directory");
+async function verifyInstaller() {
+  const packageJson = await readPackageJson();
+  await verifyReleaseArtifacts(
+    getExpectedInstallerArtifacts(packageJson, ROOT),
+    "Installer artifact",
+    packageJson,
+  );
+}
+
+async function verifyPortable() {
+  const packageJson = await readPackageJson();
+  await verifyReleaseArtifacts(
+    getExpectedPortableArtifacts(packageJson, ROOT),
+    "Portable artifact",
+    packageJson,
+  );
+}
+
+async function verifyAppx() {
+  const packageJson = await readPackageJson();
+  const expected = getExpectedAppxArtifacts(packageJson, ROOT);
+
+  await assertPathExists(expected.makeDir, "AppX artifact directory");
+  for (const file of expected.files) {
+    await assertPathExists(file, path.basename(file));
+  }
+
+  console.log("AppX package verification passed.");
+  for (const file of expected.files) {
+    await writeChecksumSummary(file);
+  }
+}
+
+async function verifyReleaseArtifacts(expected, label, packageJson) {
+  await assertPathExists(expected.makeDir, `${label.toLowerCase()} directory`);
   const existingFiles = await listFiles(expected.makeDir);
   const forbiddenLegacyInstallerArtifacts = existingFiles.filter((file) => {
     const name = path.basename(file).toLowerCase();
-    return (
-      name === "releases" ||
-      name.endsWith(".nupkg") ||
-      name.endsWith(".zip") ||
-      name.includes("-setup-")
-    );
+    return name === "releases" || name.endsWith(".nupkg") || name.includes("-setup-");
   });
   if (forbiddenLegacyInstallerArtifacts.length > 0) {
     throw new Error(
@@ -267,17 +345,47 @@ async function verifyMake() {
     await assertPathExists(file, path.basename(file));
   }
 
-  console.log("AppX package verification passed.");
+  console.log(`${label} verification passed.`);
   for (const file of expected.files) {
-    const stats = await fs.stat(file);
-    const checksumPath = `${file}.sha256`;
-    const checksum = await sha256File(file);
-    await fs.writeFile(checksumPath, `${checksum}  ${path.basename(file)}\n`, "ascii");
-    console.log(`${file}`);
-    console.log(`  Size: ${formatBytes(stats.size)}`);
-    console.log(`  SHA-256: ${checksum}`);
-    console.log(`  Checksum file: ${checksumPath}`);
+    if (file.toLowerCase().endsWith(".zip")) {
+      await assertPortableZipRoot(file, packageJson);
+    }
+    await writeChecksumSummary(file);
   }
+}
+
+async function assertPortableZipRoot(zipPath, packageJson) {
+  const portableRoot = path.basename(getExpectedPackageDirectory(packageJson, ROOT));
+  const { stdout } = await execFileAsync("tar", ["-tf", zipPath], {
+    cwd: ROOT,
+    maxBuffer: 10 * 1024 * 1024,
+  });
+  const entries = stdout.split(/\r?\n/).filter(Boolean);
+  if (entries.length === 0) {
+    throw new Error(`Portable zip is empty: ${zipPath}`);
+  }
+  const invalidEntries = entries.filter(
+    (entry) => entry !== `${portableRoot}/` && !entry.startsWith(`${portableRoot}/`),
+  );
+  if (invalidEntries.length > 0) {
+    throw new Error(
+      `Portable zip entries must be rooted at ${portableRoot}:\n${invalidEntries
+        .slice(0, 20)
+        .join("\n")}`,
+    );
+  }
+  console.log(`  Portable zip root: ${portableRoot}`);
+}
+
+async function writeChecksumSummary(file) {
+  const stats = await fs.stat(file);
+  const checksumPath = `${file}.sha256`;
+  const checksum = await sha256File(file);
+  await fs.writeFile(checksumPath, `${checksum}  ${path.basename(file)}\n`, "ascii");
+  console.log(`${file}`);
+  console.log(`  Size: ${formatBytes(stats.size)}`);
+  console.log(`  SHA-256: ${checksum}`);
+  console.log(`  Checksum file: ${checksumPath}`);
 }
 
 function assertExpectedFuses(actual) {

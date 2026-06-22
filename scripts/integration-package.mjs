@@ -8,15 +8,11 @@ import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { promisify } from "node:util";
+import { getExpectedPackageExecutable } from "./package-paths.mjs";
 
 const execFileAsync = promisify(execFile);
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
-const PACKAGE_EXE = path.join(
-  ROOT,
-  "out",
-  "Satisfactory Save Map Uploader-win32-x64",
-  "SatisfactorySaveMapUploader.exe",
-);
+const PACKAGE_EXE = getExpectedPackageExecutable(await readPackageJson(), ROOT);
 const SENTINEL = "SAFE_LOCAL_SYNTHETIC_SAV_TEST";
 const TIMEOUT_MS = 30_000;
 
@@ -325,6 +321,10 @@ async function pathExists(targetPath) {
   } catch {
     return false;
   }
+}
+
+async function readPackageJson() {
+  return JSON.parse(await fs.readFile(path.join(ROOT, "package.json"), "utf8"));
 }
 
 function sha256(buffer) {

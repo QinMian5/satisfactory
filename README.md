@@ -11,7 +11,7 @@ This project is not affiliated with, endorsed by, or sponsored by Coffee Stain S
 
 ## For Users
 
-Install the Windows package only from a signed AppX/MSIX-family artifact when one is provided. The V1 app opens a first-run permission gate before showing the uploader dashboard. After permission is granted, the dashboard shows the current save and the main watch/upload controls.
+Install the Windows build from the generated installer, or extract the portable zip and run the app without installing. The V1 app opens a first-run permission gate before showing the uploader dashboard. After permission is granted, the dashboard shows the current save and the main watch/upload controls.
 
 On first launch, the app does not scan saves, open the map page, or upload anything until you choose **Allow uploads**. That choice allows the app to provide selected `.sav` files to the third-party Satisfactory Calculator map page for processing, but the watcher stays stopped until you click **Start automatic upload**. Choosing **Not now, exit** closes the app without saving permission or starting the watcher.
 
@@ -24,7 +24,7 @@ Available actions:
 
 Pause watching is temporary and preserves permission. Disable uploads stops future automatic uploads, records a local revoked state that takes priority on restart, and returns to the permission gate until uploads are allowed again. This cannot take back a save file that was already provided to the third-party page.
 
-Unsigned GitHub beta AppX artifacts are for build verification and may not install on a clean machine until signing is configured.
+Unsigned GitHub beta installers and portable zips can trigger Windows SmartScreen warnings.
 
 ## For Developers
 
@@ -55,17 +55,27 @@ pnpm run verify:package
 pnpm run smoke:package
 pnpm run integration:package
 pnpm run make
+pnpm run make:installer
+pnpm run make:portable
 pnpm run verify:make
+pnpm run verify:installer
+pnpm run verify:portable
 ```
 
 - `pnpm run dev` and `pnpm run start` launch the Electron development app.
 - `pnpm run build` typechecks without opening a GUI.
-- `pnpm run package` creates an unpacked Windows x64 Electron package under `out/`.
+- `pnpm run package` creates an unpacked Windows x64 Electron package under `out/SatisfactorySaveMapUploader-Portable-<version>-x64/`.
 - `pnpm run verify:package` audits the unpacked package, ASAR, fuses, source maps, Authenticode status, and forbidden artifacts.
 - `pnpm run smoke:package` starts the real unpacked executable with `--smoke-test` and does not read saves or load third-party URLs.
 - `pnpm run integration:package` starts the real unpacked executable with `--integration-test-upload`, uses a local synthetic `.sav`, serves a loopback fixture page, verifies real Electron/CDP file selection, does not read real game saves, and does not access the real Satisfactory Calculator website.
-- `pnpm run make` creates a Windows x64 AppX/MSIX-family package under `out/make/appx/`.
-- `pnpm run verify:make` checks the AppX artifact and writes SHA-256 checksum files.
+- `pnpm run make` creates both Windows x64 release artifacts under `out/make/`.
+- `pnpm run make:installer` creates only the guided installer.
+- `pnpm run make:portable` creates only the portable zip.
+- `pnpm run verify:make` checks both release artifacts and writes SHA-256 checksum files.
+- `pnpm run verify:installer` checks only the guided installer.
+- `pnpm run verify:portable` checks only the portable zip.
+- `pnpm run make:appx` creates the Store-oriented AppX package when the Microsoft Store path is being validated.
+- `pnpm run verify:appx` checks the AppX artifact and writes its SHA-256 checksum file.
 
 Install git hooks when `pre-commit` is available on `PATH`:
 
