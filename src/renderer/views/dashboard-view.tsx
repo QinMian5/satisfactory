@@ -69,35 +69,36 @@ export function DashboardView({ commands, model }: DashboardViewProps) {
                 Upload latest save
               </Button>
             </CommandTooltip>
-            <AlertDialog>
-              <CommandTooltip description="Stops future uploads and exits the app. Files already provided to the third-party page cannot be taken back.">
-                <AlertDialogTrigger asChild>
-                  <Button variant="destructive">
-                    <ShieldOff className="h-4 w-4" aria-hidden="true" />
-                    Disable uploads
-                  </Button>
-                </AlertDialogTrigger>
-              </CommandTooltip>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>Disable uploads and exit?</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    This stops future uploads and exits the app. It cannot take back a save file
-                    already provided to the third-party page.
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>Cancel</AlertDialogCancel>
-                  <AlertDialogAction onClick={() => void commands.disableUploadsAndExit()}>
-                    Disable uploads
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
           </section>
-        </TooltipProvider>
 
-        <SummaryCard label="Currently opened save" title={model.latestSaveTitle} />
+          <SummaryCard label="Currently opened save" title={model.latestSaveTitle} />
+
+          <AlertDialog>
+            <CommandTooltip description="Stops future uploads and exits the app. Files already provided to the third-party page cannot be taken back.">
+              <AlertDialogTrigger asChild>
+                <Button variant="destructive">
+                  <ShieldOff className="h-4 w-4" aria-hidden="true" />
+                  Disable uploads
+                </Button>
+              </AlertDialogTrigger>
+            </CommandTooltip>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Disable uploads and exit?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  This stops future uploads and exits the app. It cannot take back a save file
+                  already provided to the third-party page.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction onClick={() => void commands.disableUploadsAndExit()}>
+                  Disable uploads
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        </TooltipProvider>
 
         {model.showIssue ? (
           <Alert role="alert" variant="destructive">

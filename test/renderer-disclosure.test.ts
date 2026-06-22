@@ -94,6 +94,20 @@ describe("renderer disclosure UI", () => {
     expect(dashboard).not.toContain("Satisfactory Save Map Watcher");
   });
 
+  it("places disable uploads below the current save summary", async () => {
+    const dashboard = await readFile("src/renderer/views/dashboard-view.tsx", "utf8");
+    const commandSectionStart = dashboard.indexOf('aria-label="Watcher commands"');
+    const currentSaveSummary = dashboard.indexOf('<SummaryCard label="Currently opened save"');
+    const disableDialog = dashboard.indexOf("<AlertDialog>");
+
+    expect(commandSectionStart).toBeGreaterThan(-1);
+    expect(currentSaveSummary).toBeGreaterThan(commandSectionStart);
+    expect(disableDialog).toBeGreaterThan(currentSaveSummary);
+    expect(dashboard.slice(commandSectionStart, currentSaveSummary)).not.toContain(
+      "Disable uploads",
+    );
+  });
+
   it("makes disabling uploads revoke permission and exit the app", async () => {
     const [dashboard, hook] = await Promise.all([
       readFile("src/renderer/views/dashboard-view.tsx", "utf8"),

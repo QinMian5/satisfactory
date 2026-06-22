@@ -57,6 +57,17 @@ describe("renderer React shell", () => {
     expect(css).toContain("--color-background");
   });
 
+  it("uses FICSIT Orange as the primary theme color without replacing semantic states", async () => {
+    const css = await readFile("src/renderer/styles.css", "utf8");
+
+    expect(css).toContain("--color-primary: #fa9549;");
+    expect(css).toContain("--color-primary-foreground: #18211d;");
+    expect(css).toContain("--color-primary-hover: #e77d23;");
+    expect(css).toContain("--color-background: #f4f2ee;");
+    expect(css).toContain("--color-destructive: #8f3128;");
+    expect(css).toContain("--color-success: #2d6f40;");
+  });
+
   it("keeps App as a thin React composition root", async () => {
     const app = await readFile("src/renderer/App.tsx", "utf8");
 
