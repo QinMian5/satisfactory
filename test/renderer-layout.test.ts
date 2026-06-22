@@ -95,6 +95,7 @@ describe("renderer React shell", () => {
       "src/renderer/components/ui/alert-dialog.tsx",
       "src/renderer/components/ui/collapsible.tsx",
       "src/renderer/components/ui/separator.tsx",
+      "src/renderer/components/ui/tooltip.tsx",
     ]) {
       await expect(readFile(primitive, "utf8")).resolves.toBeTruthy();
     }
@@ -102,6 +103,7 @@ describe("renderer React shell", () => {
     expect(renderer).toContain("@radix-ui/react-alert-dialog");
     expect(renderer).toContain("@radix-ui/react-collapsible");
     expect(renderer).toContain("@radix-ui/react-separator");
+    expect(renderer).toContain("@radix-ui/react-tooltip");
     expect(renderer).not.toContain("<details");
     expect(renderer).not.toContain("<summary");
   });

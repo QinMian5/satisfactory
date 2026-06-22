@@ -36,6 +36,7 @@ describe("build configuration", () => {
     expect(allDependencies).toHaveProperty("@radix-ui/react-collapsible");
     expect(allDependencies).toHaveProperty("@radix-ui/react-separator");
     expect(allDependencies).toHaveProperty("@radix-ui/react-slot");
+    expect(allDependencies).toHaveProperty("@radix-ui/react-tooltip");
 
     expect(allDependencies).not.toHaveProperty("@electron-forge/plugin-webpack");
     expect(allDependencies).not.toHaveProperty("webpack");

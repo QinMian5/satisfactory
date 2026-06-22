@@ -51,15 +51,21 @@ describe("renderer disclosure UI", () => {
   it("keeps diagnostic fields out of the primary dashboard copy", async () => {
     const renderer = await readRendererText();
 
-    expect(renderer).toContain("Latest save");
-    expect(renderer).toContain("Permission");
+    expect(renderer).toContain("Currently opened save");
     expect(renderer).toContain("Start watching");
     expect(renderer).toContain("Pause watching");
     expect(renderer).toContain("Upload latest save");
+    expect(renderer).toContain("Scan the save folder and upload new saves automatically.");
+    expect(renderer).toContain("Stop automatic monitoring. Manual uploads remain available.");
+    expect(renderer).toContain("Upload the newest detected save to update the map once.");
+    expect(renderer).toContain("Stops future uploads and exits the app.");
+    expect(renderer).toContain("@radix-ui/react-tooltip");
     expect(renderer).not.toContain("StatusCard");
+    expect(renderer).not.toContain("PanelDisclosure");
     expect(renderer).not.toContain("Waiting for new saves");
     expect(renderer).not.toContain("Watcher stopped");
     expect(renderer).not.toContain("Last map update");
+    expect(renderer).not.toContain("Latest save");
     expect(renderer).not.toContain("Upload now");
     expect(renderer).not.toContain("Troubleshooting details");
     expect(renderer).not.toContain("Activity log");
@@ -82,7 +88,24 @@ describe("renderer disclosure UI", () => {
     const dashboard = await readFile("src/renderer/views/dashboard-view.tsx", "utf8");
 
     expect(dashboard).toContain("Map watcher");
+    expect(dashboard.match(/<CommandTooltip/g)?.length).toBe(4);
+    expect(dashboard).not.toContain("Permission");
     expect(dashboard).not.toContain("app-kicker");
     expect(dashboard).not.toContain("Satisfactory Save Map Watcher");
+  });
+
+  it("makes disabling uploads revoke permission and exit the app", async () => {
+    const [dashboard, hook] = await Promise.all([
+      readFile("src/renderer/views/dashboard-view.tsx", "utf8"),
+      readFile("src/renderer/hooks/use-satisfactory-app.ts", "utf8"),
+    ]);
+
+    expect(dashboard).toContain("Disable uploads and exit?");
+    expect(dashboard).toContain("This stops future uploads and exits the app.");
+    expect(dashboard).toContain("commands.disableUploadsAndExit");
+    expect(hook).toContain("disableUploadsAndExit");
+    expect(hook.indexOf("await window.satisfactoryApp.revokeThirdPartyUpload()")).toBeLessThan(
+      hook.indexOf("await window.satisfactoryApp.declineThirdPartyUpload()"),
+    );
   });
 });

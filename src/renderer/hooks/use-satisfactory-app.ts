@@ -7,6 +7,7 @@ import type { AppStateSnapshot } from "../../shared/state.js";
 export type SatisfactoryAppCommands = {
   acceptThirdPartyUpload: () => Promise<void>;
   declineThirdPartyUpload: () => Promise<void>;
+  disableUploadsAndExit: () => Promise<void>;
   revokeThirdPartyUpload: () => Promise<void>;
   startWatcher: () => Promise<void>;
   stopWatcher: () => Promise<void>;
@@ -59,12 +60,30 @@ export function useSatisfactoryApp(): SatisfactoryAppModel {
     }
   }, []);
 
+  const disableUploadsAndExit = useCallback(async () => {
+    setCommandError(null);
+    try {
+      const revokedState = await window.satisfactoryApp.revokeThirdPartyUpload();
+      setState(revokedState);
+      if (
+        revokedState.permissionStatus === "revocation-save-failed" ||
+        revokedState.consentPersistenceStatus === "durable-revoke-failed"
+      ) {
+        return;
+      }
+      setState(await window.satisfactoryApp.declineThirdPartyUpload());
+    } catch (error) {
+      setCommandError(getErrorMessage(error));
+    }
+  }, []);
+
   return {
     state,
     commandError,
     commands: {
       acceptThirdPartyUpload: () => runCommand(window.satisfactoryApp.acceptThirdPartyUpload),
       declineThirdPartyUpload: () => runCommand(window.satisfactoryApp.declineThirdPartyUpload),
+      disableUploadsAndExit,
       revokeThirdPartyUpload: () => runCommand(window.satisfactoryApp.revokeThirdPartyUpload),
       startWatcher: () => runCommand(window.satisfactoryApp.startWatcher),
       stopWatcher: () => runCommand(window.satisfactoryApp.stopWatcher),
