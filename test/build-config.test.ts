@@ -81,4 +81,16 @@ describe("build configuration", () => {
       expect(workflow).not.toContain("# v4");
     }
   });
+
+  it("pins GitHub Actions to the verified Node runtime", async () => {
+    const workflows = await Promise.all([
+      readFile(".github/workflows/ci.yml", "utf8"),
+      readFile(".github/workflows/release.yml", "utf8"),
+    ]);
+
+    for (const workflow of workflows) {
+      expect(workflow).toContain("node-version: 24.14.0");
+      expect(workflow).not.toContain("node-version: 24\n");
+    }
+  });
 });
