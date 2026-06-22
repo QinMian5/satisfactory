@@ -19,6 +19,7 @@ export function createStatusWindow(
   rendererEntry: StatusWindowRendererEntry,
 ): BrowserWindow {
   const window = new BrowserWindow(createStatusWindowOptions(preloadPath));
+  window.maximize();
   if (rendererEntry.kind === "url") {
     void window.loadURL(rendererEntry.value);
   } else {
