@@ -36,7 +36,7 @@ type DashboardViewProps = {
 
 export function DashboardView({ commands, model }: DashboardViewProps) {
   return (
-    <main className="min-h-screen w-[300px] border-r border-border bg-background p-4 text-foreground">
+    <main className="min-h-screen w-[var(--layout-sidebar-width)] border-r border-border bg-background p-4 text-foreground">
       <section className="flex min-h-[calc(100vh-32px)] flex-col gap-3">
         <header>
           <h1 className="text-[22px] font-bold leading-tight tracking-normal">Map watcher</h1>
@@ -82,7 +82,7 @@ export function DashboardView({ commands, model }: DashboardViewProps) {
                 </Button>
               </AlertDialogTrigger>
             </CommandTooltip>
-            <AlertDialogContent>
+            <AlertDialogContent className="left-4 w-[calc(var(--layout-sidebar-width)_-_32px)] translate-x-0">
               <AlertDialogHeader>
                 <AlertDialogTitle>Disable uploads and exit?</AlertDialogTitle>
                 <AlertDialogDescription>
@@ -93,7 +93,7 @@ export function DashboardView({ commands, model }: DashboardViewProps) {
               <AlertDialogFooter>
                 <AlertDialogCancel>Cancel</AlertDialogCancel>
                 <AlertDialogAction onClick={() => void commands.disableUploadsAndExit()}>
-                  Disable uploads
+                  Confirm
                 </AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>

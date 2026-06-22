@@ -19,7 +19,7 @@
   --color-destructive: #8f3128;
   --color-destructive-border: #c05243;
   --color-destructive-background: #fff0ec;
-  --color-destructive-foreground: #8f3128;
+  --color-destructive-foreground: #ffffff;
   --color-success: #2d6f40;
   --color-success-border: #3f8f58;
   --color-success-background: #edf8ef;
@@ -31,6 +31,8 @@
 }
 
 :root {
+  --layout-sidebar-width: 300px;
+
   color: var(--color-foreground);
   background: var(--color-background);
   font-family:

@@ -3,7 +3,7 @@
 
 import type { AppStateSnapshot } from "../shared/state.js";
 
-export type RendererViewMode = "consent" | "dashboard" | "locked";
+export type RendererViewMode = "consent" | "dashboard";
 
 export type DashboardSummary = {
   latestSaveTitle: string;
@@ -28,19 +28,14 @@ export type DashboardViewModel = {
 
 export type ConsentViewModel = {
   isSaving: boolean;
-};
-
-export type LockedViewModel = {
-  isSaving: boolean;
-  privacyNotice: string;
+  issueTitle: string | null;
+  issueDetail: string | null;
+  showIssue: boolean;
 };
 
 export function getRendererViewMode(state: AppStateSnapshot): RendererViewMode {
   if (state.permissionStatus === "granted") {
     return "dashboard";
-  }
-  if (state.permissionStatus === "revoked" || state.permissionStatus === "revocation-save-failed") {
-    return "locked";
   }
   return "consent";
 }
@@ -78,17 +73,13 @@ export function getDashboardViewModel(
 }
 
 export function getConsentViewModel(state: AppStateSnapshot): ConsentViewModel {
-  return {
-    isSaving: state.consentPersistenceStatus === "saving",
-  };
-}
+  const issue = getPermissionPersistenceIssue(state);
 
-export function getLockedViewModel(state: AppStateSnapshot): LockedViewModel {
   return {
     isSaving: state.consentPersistenceStatus === "saving",
-    privacyNotice:
-      state.privacyNotice ??
-      "The watcher is stopped and future uploads are blocked. You can allow uploads again or exit the app.",
+    issueTitle: issue?.title ?? null,
+    issueDetail: issue?.detail ?? null,
+    showIssue: Boolean(issue),
   };
 }
 
@@ -113,6 +104,24 @@ function getDashboardIssue(state: AppStateSnapshot): { title: string; detail: st
   }
 
   return null;
+}
+
+function getPermissionPersistenceIssue(
+  state: AppStateSnapshot,
+): { title: string; detail: string } | null {
+  if (
+    state.consentPersistenceStatus !== "error" &&
+    state.consentPersistenceStatus !== "durable-revoke-failed"
+  ) {
+    return null;
+  }
+
+  return {
+    title: "Settings were not saved",
+    detail:
+      state.consentPersistenceMessage ??
+      "The app could not save your permission settings. Retry before closing the app.",
+  };
 }
 
 function getSaveFileName(savePath: string | null): string | null {

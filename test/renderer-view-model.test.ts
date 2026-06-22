@@ -6,7 +6,6 @@ import {
   getConsentViewModel,
   getDashboardSummary,
   getDashboardViewModel,
-  getLockedViewModel,
   getRendererViewMode,
 } from "../src/renderer/view-model.js";
 import type { AppStateSnapshot } from "../src/shared/state.js";
@@ -51,11 +50,24 @@ describe("renderer view model", () => {
     ).toBe("dashboard");
   });
 
-  it("shows a locked permission view after revocation or failed durable revocation", () => {
-    expect(getRendererViewMode(state({ permissionStatus: "revoked" }))).toBe("locked");
-    expect(getRendererViewMode(state({ permissionStatus: "revocation-save-failed" }))).toBe(
-      "locked",
-    );
+  it("returns to the first-run consent view after revocation", () => {
+    expect(getRendererViewMode(state({ permissionStatus: "revoked" }))).toBe("consent");
+  });
+
+  it("keeps durable revoke failures on the consent view with a visible issue", () => {
+    const revokeFailureState = state({
+      consentPersistenceStatus: "durable-revoke-failed",
+      consentPersistenceMessage: "Revocation could not be saved for restart.",
+      permissionStatus: "revocation-save-failed",
+    });
+
+    expect(getRendererViewMode(revokeFailureState)).toBe("consent");
+    expect(getConsentViewModel(revokeFailureState)).toEqual({
+      isSaving: false,
+      issueTitle: "Settings were not saved",
+      issueDetail: "Revocation could not be saved for restart.",
+      showIssue: true,
+    });
   });
 
   it("maps dashboard state to concise user-facing summary fields", () => {
@@ -169,13 +181,12 @@ describe("renderer view model", () => {
     });
   });
 
-  it("maps consent and locked views to narrow props", () => {
+  it("maps consent views to narrow props", () => {
     expect(getConsentViewModel(state({ consentPersistenceStatus: "saving" }))).toEqual({
       isSaving: true,
-    });
-    expect(getLockedViewModel(state({ privacyNotice: "Revoked in this session." }))).toEqual({
-      isSaving: false,
-      privacyNotice: "Revoked in this session.",
+      issueTitle: null,
+      issueDetail: null,
+      showIssue: false,
     });
   });
 });

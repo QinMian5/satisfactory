@@ -32,7 +32,6 @@ describe("renderer disclosure UI", () => {
 
     expect(renderer).toContain("Allow uploads");
     expect(renderer).toContain("Not now, exit");
-    expect(renderer).toContain("Allow uploads again");
     expect(renderer).toContain("Disable uploads");
     expect(renderer).toContain("https://satisfactory-calculator.com/zh/interactive-map");
     expect(renderer).toContain("file contents");
@@ -82,6 +81,8 @@ describe("renderer disclosure UI", () => {
     expect(renderer).not.toContain("Last result");
     expect(renderer).not.toContain("Privacy status");
     expect(renderer).not.toContain("Permission storage");
+    expect(renderer).not.toContain("Upload permission is revoked");
+    expect(renderer).not.toContain("Allow uploads again");
   });
 
   it("keeps the dashboard header to a single title", async () => {
@@ -108,6 +109,19 @@ describe("renderer disclosure UI", () => {
     );
   });
 
+  it("keeps the disable confirmation inside the left toolbar", async () => {
+    const [dashboard, css] = await Promise.all([
+      readFile("src/renderer/views/dashboard-view.tsx", "utf8"),
+      readFile("src/renderer/styles.css", "utf8"),
+    ]);
+
+    expect(css).toContain("--layout-sidebar-width: 300px;");
+    expect(dashboard).toContain("w-[var(--layout-sidebar-width)]");
+    expect(dashboard).toContain("left-4");
+    expect(dashboard).toContain("w-[calc(var(--layout-sidebar-width)_-_32px)]");
+    expect(dashboard).toContain("translate-x-0");
+  });
+
   it("makes disabling uploads revoke permission and exit the app", async () => {
     const [dashboard, hook] = await Promise.all([
       readFile("src/renderer/views/dashboard-view.tsx", "utf8"),
@@ -117,6 +131,9 @@ describe("renderer disclosure UI", () => {
     expect(dashboard).toContain("Disable uploads and exit?");
     expect(dashboard).toContain("This stops future uploads and exits the app.");
     expect(dashboard).toContain("commands.disableUploadsAndExit");
+    expect(dashboard).toContain("<AlertDialogCancel>Cancel</AlertDialogCancel>");
+    expect(dashboard).toContain("Confirm");
+    expect(dashboard).not.toContain(">Disable uploads</AlertDialogAction>");
     expect(hook).toContain("disableUploadsAndExit");
     expect(hook.indexOf("await window.satisfactoryApp.revokeThirdPartyUpload()")).toBeLessThan(
       hook.indexOf("await window.satisfactoryApp.declineThirdPartyUpload()"),

@@ -31,6 +31,13 @@ export function ConsentView({ commands, model }: ConsentViewProps) {
           </h1>
         </header>
 
+        {model.showIssue ? (
+          <Alert role="alert" variant="destructive">
+            <AlertTitle>{model.issueTitle}</AlertTitle>
+            {model.issueDetail ? <AlertDescription>{model.issueDetail}</AlertDescription> : null}
+          </Alert>
+        ) : null}
+
         <Alert variant="warning">
           <AlertTitle>Uploads go to a third-party website</AlertTitle>
           <AlertDescription className="mt-2">

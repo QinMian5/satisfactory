@@ -74,8 +74,9 @@ describe("renderer React shell", () => {
     expect(app).toContain("useSatisfactoryApp");
     expect(app).toContain("DashboardView");
     expect(app).toContain("ConsentView");
-    expect(app).toContain("LockedView");
     expect(app).toContain("LoadingView");
+    expect(app).not.toContain("LockedView");
+    expect(app).not.toContain("getLockedViewModel");
     expect(app).not.toContain("window.satisfactoryApp");
     expect(app).not.toContain("window.confirm");
     expect(app).not.toContain("CARD_CLASS");
@@ -86,8 +87,8 @@ describe("renderer React shell", () => {
   it("keeps Electron IPC access in a renderer hook instead of presentational views", async () => {
     const hook = await readFile("src/renderer/hooks/use-satisfactory-app.ts", "utf8");
     const views = await Promise.all(
-      ["dashboard-view.tsx", "consent-view.tsx", "locked-view.tsx", "loading-view.tsx"].map(
-        (file) => readFile(path.join("src/renderer/views", file), "utf8"),
+      ["dashboard-view.tsx", "consent-view.tsx", "loading-view.tsx"].map((file) =>
+        readFile(path.join("src/renderer/views", file), "utf8"),
       ),
     );
 
@@ -117,6 +118,15 @@ describe("renderer React shell", () => {
     expect(renderer).toContain("@radix-ui/react-tooltip");
     expect(renderer).not.toContain("<details");
     expect(renderer).not.toContain("<summary");
+  });
+
+  it("uses a filled destructive button variant for dangerous actions", async () => {
+    const button = await readFile("src/renderer/components/ui/button.tsx", "utf8");
+
+    expect(button).toContain(
+      'destructive:\n          "border-destructive bg-destructive text-destructive-foreground hover:bg-destructive/90"',
+    );
+    expect(button).not.toContain('destructive:\n          "border-destructive-border bg-card');
   });
 
   it("keeps hard-coded color values in Tailwind theme tokens instead of JSX classes", async () => {
