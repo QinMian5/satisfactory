@@ -56,4 +56,28 @@ describe("build configuration", () => {
       expect(workflow).not.toContain("cache: pnpm");
     }
   });
+
+  it("keeps CI Windows-only with LF text checkouts", async () => {
+    const [ciWorkflow, gitAttributes] = await Promise.all([
+      readFile(".github/workflows/ci.yml", "utf8"),
+      readFile(".gitattributes", "utf8"),
+    ]);
+
+    expect(ciWorkflow).toContain("runs-on: windows-latest");
+    expect(ciWorkflow).not.toContain("runs-on: ubuntu-latest");
+    expect(ciWorkflow).not.toContain("name: Linux");
+    expect(gitAttributes).toContain("* text=auto eol=lf");
+  });
+
+  it("does not pin workflow actions to deprecated major versions", async () => {
+    const workflows = await Promise.all([
+      readFile(".github/workflows/ci.yml", "utf8"),
+      readFile(".github/workflows/release.yml", "utf8"),
+    ]);
+
+    for (const workflow of workflows) {
+      expect(workflow).toContain("# v5");
+      expect(workflow).not.toContain("# v4");
+    }
+  });
 });
