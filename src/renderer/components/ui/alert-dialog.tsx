@@ -19,7 +19,7 @@ export function AlertDialogOverlay({
 }: React.ComponentPropsWithoutRef<typeof AlertDialogPrimitive.Overlay>) {
   return (
     <AlertDialogPrimitive.Overlay
-      className={cn("fixed inset-0 z-50 bg-log/45", className)}
+      className={cn("fixed inset-0 z-50 bg-foreground/45", className)}
       {...props}
     />
   );

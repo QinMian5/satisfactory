@@ -34,7 +34,6 @@ describe("build configuration", () => {
     expect(allDependencies).toHaveProperty("clsx");
     expect(allDependencies).toHaveProperty("@radix-ui/react-alert-dialog");
     expect(allDependencies).toHaveProperty("@radix-ui/react-collapsible");
-    expect(allDependencies).toHaveProperty("@radix-ui/react-scroll-area");
     expect(allDependencies).toHaveProperty("@radix-ui/react-separator");
     expect(allDependencies).toHaveProperty("@radix-ui/react-slot");
 

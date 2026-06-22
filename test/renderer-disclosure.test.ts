@@ -53,10 +53,11 @@ describe("renderer disclosure UI", () => {
 
     expect(renderer).toContain("Latest save");
     expect(renderer).toContain("Last map update");
-    expect(renderer).toContain("Troubleshooting details");
     expect(renderer).toContain("Permission");
     expect(renderer).toContain("Start watching");
     expect(renderer).toContain("Pause watching");
+    expect(renderer).not.toContain("Troubleshooting details");
+    expect(renderer).not.toContain("Activity log");
     expect(renderer).not.toContain("Privacy & permissions");
     expect(renderer).not.toContain("This app can provide selected save files");
     expect(renderer).not.toContain("Open map");

@@ -23,11 +23,6 @@ export type DashboardSummary = {
   showStopButton: boolean;
 };
 
-export type DiagnosticField = {
-  label: string;
-  value: string;
-};
-
 export type DashboardViewModel = {
   primaryStatus: PrimaryStatusCopy;
   watcherStatus: WatcherStatus;
@@ -41,8 +36,6 @@ export type DashboardViewModel = {
   startDisabled: boolean;
   stopDisabled: boolean;
   uploadDisabled: boolean;
-  diagnostics: DiagnosticField[];
-  logs: AppStateSnapshot["logs"];
 };
 
 export type ConsentViewModel = {
@@ -184,24 +177,6 @@ export function getDashboardViewModel(
       state.consentPersistenceStatus === "saving" || state.watcherStatus === "starting",
     stopDisabled: state.watcherStatus === "stopping",
     uploadDisabled: isUploadBusy(state.uploadStatus) || state.consentRequired,
-    diagnostics: [
-      { label: "Full save directory", value: state.saveRoot ?? "Not resolved" },
-      { label: "Selected save path", value: state.latestSavePath ?? "None" },
-      { label: "Watcher engine", value: state.watcherStatus },
-      { label: "Map automation", value: state.uploadStatus },
-      { label: "Started at", value: state.lastUploadStartedAt ?? "Never" },
-      { label: "Finished at", value: state.lastUploadFinishedAt ?? "Never" },
-      { label: "Outcome", value: state.lastUploadResult ?? "None" },
-      {
-        label: "Settings save state",
-        value: state.consentPersistenceMessage
-          ? `${state.consentPersistenceStatus}: ${state.consentPersistenceMessage}`
-          : state.consentPersistenceStatus,
-      },
-      { label: "Current issue", value: state.lastError ?? "None" },
-      { label: "Permission note", value: state.privacyNotice ?? "None" },
-    ],
-    logs: state.logs,
   };
 }
 

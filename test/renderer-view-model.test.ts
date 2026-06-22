@@ -233,7 +233,6 @@ describe("renderer view model", () => {
         permissionStatus: "granted",
         consentRequired: false,
         latestSavePath: "C:\\Factory\\World.sav",
-        logs: [{ timestamp: "2026-06-21T12:00:00.000Z", level: "info", message: "Started" }],
       }),
       null,
     );
@@ -246,8 +245,8 @@ describe("renderer view model", () => {
       stopDisabled: false,
       uploadDisabled: true,
     });
-    expect(model.diagnostics.map((field) => field.label)).toContain("Full save directory");
-    expect(model.logs).toHaveLength(1);
+    expect(model).not.toHaveProperty("diagnostics");
+    expect(model).not.toHaveProperty("logs");
   });
 
   it("maps command errors into the dashboard issue banner", () => {

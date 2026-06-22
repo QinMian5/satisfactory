@@ -2,8 +2,6 @@
 // out_of_scope: Electron IPC, save scanning, and upload implementation.
 
 import { Pause, Play, ShieldOff, Upload } from "lucide-react";
-import { ActivityLog } from "../components/activity-log.js";
-import { DataField } from "../components/data-field.js";
 import { PanelDisclosure } from "../components/panel-disclosure.js";
 import { StatusCard } from "../components/status-card.js";
 import { SummaryCard } from "../components/summary-card.js";
@@ -101,15 +99,6 @@ export function DashboardView({ commands, model }: DashboardViewProps) {
               </AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialog>
-        </PanelDisclosure>
-
-        <PanelDisclosure title="Troubleshooting details">
-          <section className="grid gap-2">
-            {model.diagnostics.map((field) => (
-              <DataField key={field.label} label={field.label} value={field.value} />
-            ))}
-          </section>
-          <ActivityLog logs={model.logs} />
         </PanelDisclosure>
       </section>
     </main>

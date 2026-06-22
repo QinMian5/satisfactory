@@ -28,10 +28,6 @@
   --color-warning-muted-border: #eadfbf;
   --color-warning-background: #fff8e6;
   --color-neutral-border: #7b8a82;
-  --color-log: #101613;
-  --color-log-foreground: #d8e7dd;
-  --color-log-error: #ffb4a8;
-  --color-log-warning: #ffe08a;
 }
 
 :root {
