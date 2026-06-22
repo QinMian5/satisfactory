@@ -43,4 +43,17 @@ describe("build configuration", () => {
     expect(allDependencies).not.toHaveProperty("css-loader");
     expect(allDependencies).not.toHaveProperty("style-loader");
   });
+
+  it("activates pnpm with Corepack before workflow pnpm commands", async () => {
+    const workflows = await Promise.all([
+      readFile(".github/workflows/ci.yml", "utf8"),
+      readFile(".github/workflows/release.yml", "utf8"),
+    ]);
+
+    for (const workflow of workflows) {
+      expect(workflow).toContain("corepack enable");
+      expect(workflow).toContain("corepack prepare pnpm@10.33.0 --activate");
+      expect(workflow).not.toContain("cache: pnpm");
+    }
+  });
 });
