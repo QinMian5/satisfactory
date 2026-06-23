@@ -55,6 +55,20 @@ describe("build configuration", () => {
     expect(packageJson.devDependencies["@vitejs/plugin-react"]).toBe("^5.2.0");
   });
 
+  it("overrides vulnerable build-tool transitive dependencies", async () => {
+    const packageJson = JSON.parse(await readFile("package.json", "utf8"));
+    const lockfile = await readFile("pnpm-lock.yaml", "utf8");
+
+    expect(packageJson.pnpm.overrides).toEqual({
+      esbuild: "0.28.1",
+      tar: "7.5.16",
+      tmp: "0.2.7",
+    });
+    expect(lockfile).not.toContain("esbuild@0.27.7");
+    expect(lockfile).not.toContain("tar@6.2.1");
+    expect(lockfile).not.toContain("tmp@0.0.33");
+  });
+
   it("uses uploader product metadata and builds GitHub release artifacts", async () => {
     const [packageJsonText, builderConfig, forgeConfig, appMetadata, makeScript] =
       await Promise.all([
