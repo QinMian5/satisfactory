@@ -122,6 +122,18 @@ describe("build configuration", () => {
     }
   });
 
+  it("creates draft releases with explicit repository context", async () => {
+    const releaseWorkflow = await readFile(".github/workflows/release.yml", "utf8");
+    const githubRefName = "$" + "{env:GITHUB_REF_NAME}";
+    const githubRepository = "$" + "{env:GITHUB_REPOSITORY}";
+
+    expect(releaseWorkflow).toContain(
+      `gh release view "${githubRefName}" --repo "${githubRepository}"`,
+    );
+    expect(releaseWorkflow).toContain(`gh release create "${githubRefName}" @files`);
+    expect(releaseWorkflow).toContain(`--repo "${githubRepository}"`);
+  });
+
   it("keeps CI Windows-only with LF text checkouts", async () => {
     const [ciWorkflow, gitAttributes] = await Promise.all([
       readFile(".github/workflows/ci.yml", "utf8"),

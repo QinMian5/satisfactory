@@ -81,7 +81,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh release view "${env:GITHUB_REF_NAME}" 2>$null
+          gh release view "${env:GITHUB_REF_NAME}" --repo "${env:GITHUB_REPOSITORY}" 2>$null
           if ($LASTEXITCODE -eq 0) {
             throw "Release ${env:GITHUB_REF_NAME} already exists."
           }
@@ -93,4 +93,5 @@ jobs:
           gh release create "${env:GITHUB_REF_NAME}" @files `
             --draft `
             --title "${env:GITHUB_REF_NAME}" `
-            --notes "$notes"
+            --notes "$notes" `
+            --repo "${env:GITHUB_REPOSITORY}"
