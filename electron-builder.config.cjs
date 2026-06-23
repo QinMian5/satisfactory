@@ -7,7 +7,7 @@ const archMacro = "$" + "{arch}";
 const extMacro = "$" + "{ext}";
 
 module.exports = {
-  appId: "io.github.qinmian5.satisfactory-save-map-uploader",
+  appId: "com.mianqin.satisfactory-save-map-uploader",
   productName: packageJson.productName,
   artifactName: `SatisfactorySaveMapUploader-Portable-${versionMacro}-${archMacro}.${extMacro}`,
   directories: {

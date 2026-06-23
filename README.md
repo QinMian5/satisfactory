@@ -2,8 +2,8 @@
 
 [English](README.md) | [简体中文](docs/readme/README.zh-CN.md)
 
-[![CI](https://github.com/QinMian5/satisfactory/actions/workflows/ci.yml/badge.svg)](https://github.com/QinMian5/satisfactory/actions/workflows/ci.yml)
-[![Release](https://github.com/QinMian5/satisfactory/actions/workflows/release.yml/badge.svg)](https://github.com/QinMian5/satisfactory/actions/workflows/release.yml)
+[![CI](https://github.com/QinMian5/satisfactory-save-map-uploader/actions/workflows/ci.yml/badge.svg)](https://github.com/QinMian5/satisfactory-save-map-uploader/actions/workflows/ci.yml)
+[![Release](https://github.com/QinMian5/satisfactory-save-map-uploader/actions/workflows/release.yml/badge.svg)](https://github.com/QinMian5/satisfactory-save-map-uploader/actions/workflows/release.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 ![Windows](https://img.shields.io/badge/platform-Windows-0078D4.svg)
 
@@ -13,7 +13,7 @@ It is not affiliated with, endorsed by, or sponsored by Coffee Stain Studios, Co
 
 ## Download
 
-Download the Windows build from [GitHub Releases](https://github.com/QinMian5/satisfactory/releases):
+Download the Windows build from [GitHub Releases](https://github.com/QinMian5/satisfactory-save-map-uploader/releases):
 
 - `SatisfactorySaveMapUploader-Installer-<version>-x64.exe` installs the app with a guided Windows installer.
 - `SatisfactorySaveMapUploader-Portable-<version>-x64.zip` runs after extracting the folder, without installing.

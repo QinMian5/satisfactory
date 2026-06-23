@@ -2,8 +2,8 @@
 
 [English](../../README.md) | [简体中文](README.zh-CN.md)
 
-[![CI](https://github.com/QinMian5/satisfactory/actions/workflows/ci.yml/badge.svg)](https://github.com/QinMian5/satisfactory/actions/workflows/ci.yml)
-[![Release](https://github.com/QinMian5/satisfactory/actions/workflows/release.yml/badge.svg)](https://github.com/QinMian5/satisfactory/actions/workflows/release.yml)
+[![CI](https://github.com/QinMian5/satisfactory-save-map-uploader/actions/workflows/ci.yml/badge.svg)](https://github.com/QinMian5/satisfactory-save-map-uploader/actions/workflows/ci.yml)
+[![Release](https://github.com/QinMian5/satisfactory-save-map-uploader/actions/workflows/release.yml/badge.svg)](https://github.com/QinMian5/satisfactory-save-map-uploader/actions/workflows/release.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](../../LICENSE)
 ![Windows](https://img.shields.io/badge/platform-Windows-0078D4.svg)
 
@@ -13,7 +13,7 @@ Satisfactory Save Map Uploader 是一个非官方 Windows 桌面应用。它会�
 
 ## 下载
 
-从 [GitHub Releases](https://github.com/QinMian5/satisfactory/releases) 下载 Windows 构建：
+从 [GitHub Releases](https://github.com/QinMian5/satisfactory-save-map-uploader/releases) 下载 Windows 构建：
 
 - `SatisfactorySaveMapUploader-Installer-<version>-x64.exe` 是带安装向导的 Windows 安装器。
 - `SatisfactorySaveMapUploader-Portable-<version>-x64.zip` 解压后即可运行，不需要安装。

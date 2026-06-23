@@ -59,6 +59,7 @@ describe("build configuration", () => {
 
     expect(packageJson.name).toBe("satisfactory-save-map-uploader");
     expect(packageJson.productName).toBe("Satisfactory Save Map Uploader");
+    expect(packageJson.author).toBe("Mian Qin");
     const packageScripts = Object.entries(packageJson.scripts)
       .filter(([name]) => name === "package" || name.startsWith("make"))
       .map(([, script]) => script)
@@ -73,7 +74,7 @@ describe("build configuration", () => {
     expect(packageJson.scripts["verify:make"]).toContain("verify-package.mjs make");
     expect(packageJson.scripts["verify:installer"]).toContain("verify-package.mjs installer");
     expect(packageJson.scripts["verify:portable"]).toContain("verify-package.mjs portable");
-    expect(builderConfig).toContain('appId: "io.github.qinmian5.satisfactory-save-map-uploader"');
+    expect(builderConfig).toContain('appId: "com.mianqin.satisfactory-save-map-uploader"');
     expect(builderConfig).toContain('target: ["nsis", "zip"]');
     expect(builderConfig).toContain("SatisfactorySaveMapUploader-Installer-");
     expect(builderConfig).toContain("SatisfactorySaveMapUploader-Portable-");
@@ -89,6 +90,8 @@ describe("build configuration", () => {
       'packageFamilyName: "MianQin.SatisfactorySaveMapUploader_xrv9fnatjde9j"',
     );
     expect(appMetadata).toContain('partnerCenterProductId: "9PHQ2D03K6ZS"');
+    expect(appMetadata).toContain('author: "Mian Qin"');
+    expect(appMetadata).toContain('appId: "com.mianqin.satisfactory-save-map-uploader"');
     expect(forgeConfig).not.toContain("MakerSquirrel");
     expect(forgeConfig).not.toContain("@electron-forge/maker-squirrel");
     expect(packageJson.scripts.make).not.toContain("electron-forge make");
