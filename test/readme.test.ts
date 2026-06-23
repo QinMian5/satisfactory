@@ -5,6 +5,14 @@ import { readFile } from "node:fs/promises";
 import { describe, expect, it } from "vitest";
 
 const userReadmes = ["README.md", "docs/readme/README.zh-CN.md"] as const;
+const publicMarkdownFiles = [
+  ...userReadmes,
+  "PRIVACY.md",
+  "SECURITY.md",
+  "docs/manual-acceptance.md",
+  "docs/release-policy.md",
+  "docs/store-distribution.md",
+] as const;
 
 async function readMarkdown(path: string) {
   return readFile(path, "utf8");
@@ -14,15 +22,31 @@ function collectPnpmScripts(markdown: string) {
   return [...markdown.matchAll(/`pnpm run ([^`\s]+)`/g)].map((match) => match[1]);
 }
 
-describe("user-facing README files", () => {
+describe("public documentation", () => {
   it("do not use metadata front matter", async () => {
-    for (const path of userReadmes) {
+    for (const path of publicMarkdownFiles) {
       const markdown = await readMarkdown(path);
 
       expect(markdown).not.toMatch(/^---\r?\n/);
       expect(markdown).not.toContain("abstract:");
       expect(markdown).not.toContain("out_of_scope:");
     }
+  });
+
+  it("uses current product naming in public documentation", async () => {
+    for (const path of publicMarkdownFiles) {
+      const markdown = await readMarkdown(path);
+
+      expect(markdown).not.toContain("Satisfactory Save Map Watcher");
+    }
+  });
+
+  it("describes the localized map site without hard-coding one language path", async () => {
+    const privacy = await readMarkdown("PRIVACY.md");
+
+    expect(privacy).toContain("https://satisfactory-calculator.com");
+    expect(privacy).not.toContain("https://satisfactory-calculator.com/zh/interactive-map");
+    expect(privacy).not.toContain("https://satisfactory-calculator.com/en/interactive-map");
   });
 
   it("link between the English and Chinese versions", async () => {
@@ -72,5 +96,15 @@ describe("user-facing README files", () => {
     for (const script of documentedScripts) {
       expect(packageJson.scripts).toHaveProperty(script);
     }
+  });
+
+  it("uses current automatic upload labels in manual acceptance steps", async () => {
+    const manualAcceptance = await readMarkdown("docs/manual-acceptance.md");
+
+    expect(manualAcceptance).toContain("Start automatic upload");
+    expect(manualAcceptance).toContain("Pause automatic upload");
+    expect(manualAcceptance).not.toMatch(/\bwatcher\b/i);
+    expect(manualAcceptance).not.toMatch(/Click Start(?! automatic upload)/);
+    expect(manualAcceptance).not.toMatch(/Click Stop\b/);
   });
 });

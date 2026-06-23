@@ -1,8 +1,3 @@
----
-abstract: Microsoft Store distribution planning and validation checklist for packaged desktop builds.
-out_of_scope: GitHub beta publishing, runtime watcher implementation, and commercial certificate purchasing.
----
-
 # Store Distribution
 
 ## Planned Packaging Path

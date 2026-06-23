@@ -1,8 +1,3 @@
----
-abstract: Release channel, signing, and artifact provenance policy for desktop builds.
-out_of_scope: Runtime application behavior, Store listing text, and vulnerability intake procedures.
----
-
 # Release Policy
 
 ## CI

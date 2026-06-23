@@ -1,13 +1,8 @@
----
-abstract: Security reporting policy for the Satisfactory Save Map Watcher project.
-out_of_scope: Privacy disclosure, release signing policy, and Store distribution planning.
----
-
 # Security
 
 ## Supported Versions
 
-Security fixes target the latest published version of the application.
+Security fixes target the latest published version of Satisfactory Save Map Uploader.
 
 ## Reporting A Vulnerability
 
